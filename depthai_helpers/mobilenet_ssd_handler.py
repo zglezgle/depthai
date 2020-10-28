@@ -164,7 +164,7 @@ def show_mobilenet_ssd(detections, frame, **kwargs):
         # d1=detections["stage1"][1]
         # print('d1',d1)
         # print(type(d1))
-        info_text='dx={}'#.format(round(float(d0["depth_x"])-float(d1["depth_x"]),2))
+        info_text='dx={}'.format('a') # round(float(d0["depth_x"])-float(d1["depth_x"]),2))
         cv2.putText(frame, "info: " + info_text, 
                         (2, frame.shape[0]-18), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
 
