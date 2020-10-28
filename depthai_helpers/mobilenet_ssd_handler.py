@@ -160,11 +160,18 @@ def show_mobilenet_ssd(detections, frame, **kwargs):
         
         #zgle
         # info_text='dx={}, dy={}, dz={}'.format(detection["depth_x"],detection["depth_y"],detection["depth_z"])
-        # d0=detections["stage1"][0]
-        # d1=detections["stage1"][1]
-        # print('d1',d1)
-        # print(type(d1))
-        info_text='dx={}'.format('a') # round(float(d0["depth_x"])-float(d1["depth_x"]),2))
+        info_text='...'
+        if len(detections["stage1"])>1:
+            d0=detections["stage1"][0]
+            d1=detections["stage1"][1]
+            # print('d0',d0)
+            # print('d1',d1)
+            info_text='dx={}; dy={}; dz={};'.format(
+                round(float(d0["depth_x"])-float(d1["depth_x"]),2),
+                round(float(d0["depth_y"])-float(d1["depth_y"]),2),
+                round(float(d0["depth_z"])-float(d1["depth_z"]),2)
+                )
+            print(info_text)
         cv2.putText(frame, "info: " + info_text, 
                         (2, frame.shape[0]-18), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
 
