@@ -115,8 +115,7 @@ def show_mobilenet_ssd(detections, frame, **kwargs):
     last_detected = datetime.now()
     # iterate through pre-saved entries & draw rectangle & text on image:
     for idx, detection in enumerate(detections["stage1"]):
-        print('idx:',idx)
-        print('detection:',detection)
+        # print(detection)
         if is_depth:
             pt1 = nn_to_depth_coord(detection["x_min"], detection["y_min"], nn2depth)
             pt2 = nn_to_depth_coord(detection["x_max"], detection["y_max"], nn2depth)
@@ -132,16 +131,12 @@ def show_mobilenet_ssd(detections, frame, **kwargs):
         x1, y1 = pt1
         x2, y2 = pt2
 
+        cv2.rectangle(frame, pt1, pt2, color)
         # Handles case where TensorEntry object label is out if range
         if labels is not None:
             label = labels[detection["label"]]
         else:
             label = str(detection["label"])
-
-        #zgle:
-        color=(255, 0, 0) if label=='tree' else (0, 0, 255)
-        cv2.rectangle(frame, pt1, pt2, color)
-        # print(label, detection["depth_x"], detection["depth_y"], detection["depth_z"])
 
         pt_t1 = x1, y1 + 20
         cv2.putText(frame, label, pt_t1, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
@@ -150,51 +145,41 @@ def show_mobilenet_ssd(detections, frame, **kwargs):
         cv2.putText(frame, '{:.2f}'.format(100*detection["confidence"]) + ' %', pt_t2, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         if config['ai']['calc_dist_to_bb']:
             pt_t3 = x1, y1 + 60
-            cv2.putText(frame, 'x:' '{:7.3f}'.format(detection["depth_x"]) + ' m', pt_t3, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+            cv2.putText(frame, 'zx:' '{:7.3f}'.format(detection["depth_x"]) + ' m', pt_t3, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
             pt_t4 = x1, y1 + 80
-            cv2.putText(frame, 'y:' '{:7.3f}'.format(detection["depth_y"]) + ' m', pt_t4, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+            cv2.putText(frame, 'zy:' '{:7.3f}'.format(detection["depth_y"]) + ' m', pt_t4, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
             pt_t5 = x1, y1 + 100
-            cv2.putText(frame, 'z:' '{:7.3f}'.format(detection["depth_z"]) + ' m', pt_t5, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+            cv2.putText(frame, 'zz:' '{:7.3f}'.format(detection["depth_z"]) + ' m', pt_t5, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         
-        #zgle
-        # info_text='dx={}, dy={}, dz={}'.format(detection["depth_x"],detection["depth_y"],detection["depth_z"])
-        # d0=detections["stage1"][0]
-        # d1=detections["stage1"][1]
-        # print('d1',d1)
-        # print(type(d1))
-        info_text='dx={}'#.format(round(float(d0["depth_x"])-float(d1["depth_x"]),2))
-        cv2.putText(frame, "info: " + info_text, 
-                        (2, frame.shape[0]-18), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
-
-        # # Second-stage NN
-        # if idx == 0: # For now we run second-stage only on first detection
-        #     if any(x in config['ai']['blob_file2'] for x in ['landmarks-regression-retail-0009', 'facial-landmarks-35-adas-0002'] ):
-        #         landmarks = detections["stage2"]
-        #         # Show
-        #         bb_w = x2 - x1
-        #         bb_h = y2 - y1
-        #         for i in landmarks:
-        #             x = x1 + int(i[0]*bb_w)
-        #             y = y1 + int(i[1]*bb_h)
-        #             cv2.circle(frame, (x,y), 4, (255, 0, 0))
-        #     if 'emotions-recognition-retail-0003' in config['ai']['blob_file2']:
-        #         # Decode
-        #         emotion_data = detections["stage2"]
-        #         # Show
-        #         e_states = {
-        #             0 : "neutral",
-        #             1 : "happy",
-        #             2 : "sad",
-        #             3 : "surprise",
-        #             4 : "anger"
-        #         }
-        #         pt_t3 = x2-50, y2-10
-        #         max_confidence = max(emotion_data)
-        #         if(max_confidence > 0.6):
-        #             emotion = e_states[np.argmax(emotion_data)]
-        #             if (datetime.now() - last_detected).total_seconds() < 100:
-        #                 cv2.putText(frame, emotion, pt_t3, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255, 0), 2)
+        # Second-stage NN
+        if idx == 0: # For now we run second-stage only on first detection
+            if any(x in config['ai']['blob_file2'] for x in ['landmarks-regression-retail-0009', 'facial-landmarks-35-adas-0002'] ):
+                landmarks = detections["stage2"]
+                # Show
+                bb_w = x2 - x1
+                bb_h = y2 - y1
+                for i in landmarks:
+                    x = x1 + int(i[0]*bb_w)
+                    y = y1 + int(i[1]*bb_h)
+                    cv2.circle(frame, (x,y), 4, (255, 0, 0))
+            if 'emotions-recognition-retail-0003' in config['ai']['blob_file2']:
+                # Decode
+                emotion_data = detections["stage2"]
+                # Show
+                e_states = {
+                    0 : "neutral",
+                    1 : "happy",
+                    2 : "sad",
+                    3 : "surprise",
+                    4 : "anger"
+                }
+                pt_t3 = x2-50, y2-10
+                max_confidence = max(emotion_data)
+                if(max_confidence > 0.6):
+                    emotion = e_states[np.argmax(emotion_data)]
+                    if (datetime.now() - last_detected).total_seconds() < 100:
+                        cv2.putText(frame, emotion, pt_t3, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255, 0), 2)
     
     return frame

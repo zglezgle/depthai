@@ -21,6 +21,7 @@ check_depthai_version()
 import consts.resource_paths
 from depthai_helpers import utils
 from depthai_helpers.cli_utils import cli_print, PrintColors
+from depthai_helpers.model_downloader import download_model
 
 from depthai_helpers.config_manager import DepthConfigManager
 from depthai_helpers.arg_manager import CliArgs
@@ -250,11 +251,15 @@ class DepthAI:
                         frame = show_nn(nnet_prev["entries_prev"][camera], frame, NN_json=NN_json, config=config)
                         if enable_object_tracker and tracklets is not None:
                             frame = show_tracklets(tracklets, frame, labels)
-                    cv2.putText(frame, "fps: " + str(frame_count_prev[window_name]), (25, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0))
-                    cv2.putText(frame, "NN fps: " + str(frame_count_prev['nn'][camera]), (2, frame.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
+                    cv2.putText(frame, "zfps: " + str(frame_count_prev[window_name]), (25, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0))
+                    cv2.putText(frame, "zNN fps: " + str(frame_count_prev['nn'][camera]) + '...', 
+                        (2, frame.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0))
                     cv2.imshow(window_name, frame)
                 elif packet.stream_name in ['left', 'right', 'disparity', 'rectified_left', 'rectified_right']:
                     frame_bgr = packetData
+
+                    print('frame_bgr:', frame_bgr)
+
                     if args['pointcloud'] and packet.stream_name == 'rectified_right':
                         right_rectified = packetData
                     cv2.putText(frame_bgr, packet.stream_name, (25, 25), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0))
